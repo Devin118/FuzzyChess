@@ -146,7 +146,8 @@ public class ChessBoard : MonoBehaviour
         }
 
         List<Vector2Int> selection = selectedPiece.AvailableMoves;
-        if (selectedPiece.CorpMoveNumber() >= 0 && !selectedPiece.CommanderMovedOne()) 
+        //this needs to be fixed later. regressed change for now.
+        if (selectedPiece.CorpMoveNumber() >= 1 && !selectedPiece.CommanderMovedOne()) 
         {
             selection.Clear();
             selection.AddRange(selectedPiece.GetAdjacentSquares(selectedPiece.occupiedSquare));
