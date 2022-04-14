@@ -19,6 +19,7 @@ public abstract class Piece : MonoBehaviour
     private bool delegated = false;
     public bool isDelegated { get { return delegated; } set { delegated = value; } }
     public List<Vector2Int> AvailableMoves;
+    private float speedOfAnimation = 0.2f;
 
     static Vector2Int[] directions = new Vector2Int[]
     {
@@ -108,8 +109,8 @@ public abstract class Piece : MonoBehaviour
 
     public void MoveTo(Transform transform, Vector3 targetPosition)
     {
-        transform.position = targetPosition;
-
+        //transform.position = targetPosition;
+        StartCoroutine(MoveAtoB(transform.gameObject, targetPosition, speedOfAnimation));
         SFXController.PlaySoundMovement();
     }
 
@@ -274,4 +275,12 @@ public abstract class Piece : MonoBehaviour
         else return true;
     }
 
+    IEnumerator MoveAtoB(GameObject piece, Vector3 destination, float speed)
+    {
+        while(piece.transform.position != destination)
+        {
+            piece.transform.position = Vector3.MoveTowards(piece.transform.position, destination, speed * Time.deltaTime);
+            yield return null;
+        }
+    }
 }
