@@ -70,7 +70,6 @@ public class AIController : MonoBehaviour
 
                         yield return new WaitForSeconds(1);
                         board.OnSquareSelected(movePosition);
-                        SFXController.PlaySoundMovement();
 
                         break;
                     }

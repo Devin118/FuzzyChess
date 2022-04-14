@@ -19,7 +19,6 @@ public abstract class Piece : MonoBehaviour
     private bool delegated = false;
     public bool isDelegated { get { return delegated; } set { delegated = value; } }
     public List<Vector2Int> AvailableMoves;
-    private float speedOfAnimation = 0.66f;
 
     static Vector2Int[] directions = new Vector2Int[]
     {
@@ -110,8 +109,8 @@ public abstract class Piece : MonoBehaviour
     public void MoveTo(Transform transform, Vector3 targetPosition)
     {
         //transform.position = targetPosition;
-        StartCoroutine(MoveAtoB(transform.gameObject, targetPosition, speedOfAnimation));
-        SFXController.PlaySoundMovement();
+        //SFXController.PlaySoundMovement();
+        StartCoroutine(MoveAtoB(transform.gameObject, transform.position, targetPosition));
     }
 
     public virtual void MovePiece(Vector2Int coords) 
@@ -275,13 +274,26 @@ public abstract class Piece : MonoBehaviour
         else return true;
     }
 
-    IEnumerator MoveAtoB(GameObject piece, Vector3 destination, float speed)
+    IEnumerator MoveAtoB(GameObject piece, Vector3 startingLocation, Vector3 destination)
     {
         board.acceptingInputs = false;
+        startingLocation.y = 0.08f;
+        Vector3 apex = startingLocation;
+
+        while(piece.transform.position != apex)
+        {
+            piece.transform.position = Vector3.MoveTowards(piece.transform.position, apex, 0.6f * Time.deltaTime);
+            yield return null;
+        }
         while(piece.transform.position != destination)
         {
-            piece.transform.position = Vector3.MoveTowards(piece.transform.position, destination, speed * Time.deltaTime);
+            piece.transform.position = Vector3.MoveTowards(piece.transform.position, destination, 0.4f * Time.deltaTime);
             yield return null;
+        }
+
+        if(Vector3.Distance(piece.transform.position, destination) < .1f)
+        {
+            SFXController.PlaySoundMovement();
         }
         board.acceptingInputs = true;
     }
