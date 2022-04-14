@@ -3,21 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class MusicController : MonoBehaviour
-{ 
-    public static MusicController instance;
+{
+    AudioSource audioSource;
+    AudioClip clipMusic;
+    float volume = 0.02f;
 
-    // Start is called before the first frame update
-    void Awake()
+    public void ChangeVolume(float changeVolume)
     {
-        DontDestroyOnLoad(this.gameObject);
+        volume = changeVolume;
+    }
 
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+    void Start()
+    {
+        clipMusic = Resources.Load<AudioClip> ("Audio/Chopin Fsharp Adagio Strings");
+        audioSource = this.gameObject.AddComponent<AudioSource>();
+        audioSource.loop = true;
+        audioSource.PlayOneShot(clipMusic, volume);
     }
 }
