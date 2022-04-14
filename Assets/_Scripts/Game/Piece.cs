@@ -19,7 +19,7 @@ public abstract class Piece : MonoBehaviour
     private bool delegated = false;
     public bool isDelegated { get { return delegated; } set { delegated = value; } }
     public List<Vector2Int> AvailableMoves;
-    private float speedOfAnimation = 0.2f;
+    private float speedOfAnimation = 0.66f;
 
     static Vector2Int[] directions = new Vector2Int[]
     {
@@ -111,6 +111,7 @@ public abstract class Piece : MonoBehaviour
     {
         //transform.position = targetPosition;
         StartCoroutine(MoveAtoB(transform.gameObject, targetPosition, speedOfAnimation));
+        StartCoroutine(InputSleepOneSecond());
         SFXController.PlaySoundMovement();
     }
 
@@ -283,4 +284,12 @@ public abstract class Piece : MonoBehaviour
             yield return null;
         }
     }
+
+    IEnumerator InputSleepOneSecond()
+    {
+        board.acceptingInputs = false;
+        yield return new WaitForSeconds(1);
+        board.acceptingInputs = true;
+    }
+
 }
