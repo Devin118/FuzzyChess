@@ -111,7 +111,6 @@ public abstract class Piece : MonoBehaviour
     {
         //transform.position = targetPosition;
         StartCoroutine(MoveAtoB(transform.gameObject, targetPosition, speedOfAnimation));
-        StartCoroutine(InputSleepOneSecond());
         SFXController.PlaySoundMovement();
     }
 
@@ -278,17 +277,12 @@ public abstract class Piece : MonoBehaviour
 
     IEnumerator MoveAtoB(GameObject piece, Vector3 destination, float speed)
     {
+        board.acceptingInputs = false;
         while(piece.transform.position != destination)
         {
             piece.transform.position = Vector3.MoveTowards(piece.transform.position, destination, speed * Time.deltaTime);
             yield return null;
         }
-    }
-
-    IEnumerator InputSleepOneSecond()
-    {
-        board.acceptingInputs = false;
-        yield return new WaitForSeconds(1);
         board.acceptingInputs = true;
     }
 
