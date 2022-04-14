@@ -4,6 +4,13 @@ using UnityEngine;
 
 public class SFXController : MonoBehaviour
 {
+    private static float volume = 0.5f;
+
+    public static void ChangeVolume(float changeVolume)
+    {
+        volume = changeVolume;
+    }
+
     public static void PlaySoundMovement()
     {
         GameObject soundObject = new GameObject("SFX Object");
@@ -11,7 +18,9 @@ public class SFXController : MonoBehaviour
         AudioClip clipPieceMovement = Resources.Load<AudioClip> ("Audio/PieceMove");
 
         AudioSource audioSource = soundObject.AddComponent<AudioSource>();
-        audioSource.PlayOneShot(clipPieceMovement);
+        audioSource.PlayOneShot(clipPieceMovement, volume);
+
+        Destroy(soundObject);
     }
     public static void PlaySoundCapture()
     {
@@ -20,7 +29,9 @@ public class SFXController : MonoBehaviour
         AudioClip clipPieceCapture = Resources.Load<AudioClip> ("Audio/PieceCapture");
 
         AudioSource audioSource = soundObject.AddComponent<AudioSource>();
-        audioSource.PlayOneShot(clipPieceCapture);
+        audioSource.PlayOneShot(clipPieceCapture, volume);
+        
+        Destroy(soundObject);
     }
     public static void PlaySoundDiceRoll()
     {
@@ -29,7 +40,9 @@ public class SFXController : MonoBehaviour
         AudioClip clipDiceRoll = Resources.Load<AudioClip> ("Audio/DiceRoll");
 
         AudioSource audioSource = soundObject.AddComponent<AudioSource>();
-        audioSource.PlayOneShot(clipDiceRoll);
+        audioSource.PlayOneShot(clipDiceRoll, volume);
+        
+        Destroy(soundObject);
     }
     public static void PlaySoundGameWon()
     {
@@ -38,7 +51,9 @@ public class SFXController : MonoBehaviour
         AudioClip clipGameWon = Resources.Load<AudioClip> ("Audio/GameWon");
 
         AudioSource audioSource = soundObject.AddComponent<AudioSource>();
-        audioSource.PlayOneShot(clipGameWon);
+        audioSource.PlayOneShot(clipGameWon, volume);
+        
+        Destroy(soundObject);
     }
     public static void PlaySoundGameLost()
     {
@@ -47,6 +62,8 @@ public class SFXController : MonoBehaviour
         AudioClip clipGameLost = Resources.Load<AudioClip> ("Audio/GameLost");
 
         AudioSource audioSource = soundObject.AddComponent<AudioSource>();
-        audioSource.PlayOneShot(clipGameLost);
+        audioSource.PlayOneShot(clipGameLost, volume);
+        
+        Destroy(soundObject);
     }
 }
