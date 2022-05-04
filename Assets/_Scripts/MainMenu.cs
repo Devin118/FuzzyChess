@@ -11,8 +11,11 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private GameObject softScreen,mainMenuScreen, playScreen, statsScreen, settingsScreen, rulesScreen, creditsScreen;
     [SerializeField] private TextMeshProUGUI winText, loseText;
     [SerializeField] private Button aiVsAiButton;
+    [SerializeField] private Dropdown changeResolution;
 
     private const string WINS = "Wins", LOSS = "Losses";
+    
+    Resolution[] resolutions; // Stores all possible resolutions that the current monitor you are playing on supports!
 
     private void Awake()
     {
@@ -32,6 +35,38 @@ public class MainMenu : MonoBehaviour
 
         // And wherever wins / losses are handled (probably Game Manager), update the value
     }
+
+    private void Start()
+    {
+        resolutions = Screen.resolutions;
+        changeResolution.ClearOptions(); // clean up for new screen
+
+        List<string> options = new List<string>();
+
+       int currentResIndex = 0;
+        for (int i = 0; i < resolutions.Length; i++)
+        {
+            string option = resolutions[i].width + " x " + resolutions[i].height + " @ " + resolutions[i].refreshRate + "hz";
+            
+            options.Add(option);
+
+           if (resolutions[i].width == Screen.width)
+            {
+                if (resolutions[i].height == Screen.height)
+                {
+                    currentResIndex = i;
+                    Debug.Log(i);
+                    Debug.Log(resolutions[i].width + " x " + resolutions[i].height);
+                }
+            }
+        }
+
+        changeResolution.AddOptions(options);
+        changeResolution.value = currentResIndex;
+        changeResolution.RefreshShownValue();
+
+    }
+
 
     private void SetStatText()
     {
@@ -155,6 +190,12 @@ public class MainMenu : MonoBehaviour
     {
         //edit here
         SFXController.PlaySoundMenuButton();
+    }
+    
+    public void UI_SetResolution(int resIndex)
+    {
+        Resolution resolution = resolutions[resIndex];
+        Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreen);
     }
 
     public void UI_RulesMode()
