@@ -180,10 +180,20 @@ public class AIController : MonoBehaviour
                             newAiMoves.Add(new ArrayList() { false, aiPiece, board.GetPositionFromCoords(move), getMoveValue(false, false, move, aiPiece, null) });
                         else
                         {
-                            if(aiPiece.CommanderMovedOne() && aiPiece.CorpMoveNumber() < 1)
-                                //Add an aiMove movement if there no piece in an avaliable move spot (commander making normal move)
+                            if(aiPiece.CorpMoveNumber() < 1)
+                                //Add an aiMove movement if there no piece in an avaliable move spot (commander making any move)
                                 newAiMoves.Add(new ArrayList() { false, aiPiece, board.GetPositionFromCoords(move), getMoveValue(false, false, move, aiPiece, null) });
                             else if (!aiPiece.CommanderMovedOne())
+                            {
+                                List<Vector2Int> adjacentSquares = aiPiece.GetAdjacentSquares();
+                                foreach (Vector2Int adjacentSquare in adjacentSquares)
+                                    if (adjacentSquare.Equals(move))
+                                        //Add an aiMove movement if there no piece in an avaliable move spot (commander extra move)
+                                        newAiMoves.Add(new ArrayList() { false, aiPiece, board.GetPositionFromCoords(move), getMoveValue(false, false, move, aiPiece, null) });
+                            }
+                            else if (aiPiece.CorpMoveNumber() < 2 && aiPiece.CommanderMovedOne())
+                                //Add an aiMove movement if there no piece in an avaliable move spot (commander making non-extra-command move)
+                                newAiMoves.Add(new ArrayList() { false, aiPiece, board.GetPositionFromCoords(move), getMoveValue(false, false, move, aiPiece, null) });
                         }
                     }
                 }
