@@ -36,7 +36,7 @@ public class AIController : MonoBehaviour
         {PieceType.Pawn, 10}
     };
 
-    //Is Attack Move | AI Piece | Movement Location | Value of Move
+    //Is Attack Move | Is Commander Move | AI Piece | Movement Location | Value of Move
     private List<ArrayList> aiMoves = new List<ArrayList>();
 
     private IEnumerator AI_TakeTurn_Coroutine()
@@ -61,9 +61,9 @@ public class AIController : MonoBehaviour
                     Debug.Log("AI " + ((Piece)a[1]).pieceType + " moving to " + board.GetCoordsFromPosition((Vector3)a[2]) + ". Move Value: " + a[3]);
             }*/
 
-            Piece attackingPiece = (Piece)aiMoves.ElementAt(0)[1];
+            Piece attackingPiece = (Piece)aiMoves.ElementAt(0)[2];
             Vector3 piecePosition = board.GetPositionFromCoords(attackingPiece.occupiedSquare);
-            Vector3 movePosition = (Vector3)aiMoves.ElementAt(0)[2];
+            Vector3 movePosition = (Vector3)aiMoves.ElementAt(0)[3];
 
             //Select square with piece that can attack opponent
             yield return new WaitForSeconds(1f);
@@ -71,6 +71,17 @@ public class AIController : MonoBehaviour
 
             if (attackingPiece.pieceType != PieceType.Knight)
             {
+                //Corp Commander Extra Move Detection
+                if ((bool)aiMoves.ElementAt(0)[1] == true && movedOneSquare(attackingPiece, board.GetCoordsFromPosition(movePosition)))
+                {
+                    if (attackingPiece.corpType == CorpType.King)
+                        board.KingMovedOne = true;
+                    if (attackingPiece.corpType == CorpType.Left)
+                        board.LeftBishopMovedOne = true;
+                    if (attackingPiece.corpType == CorpType.Right)
+                        board.RightBishopMovedOne = true;
+                }
+
                 //Move
                 yield return new WaitForSeconds(1.5f);
                 board.OnSquareSelected(movePosition);
@@ -146,7 +157,7 @@ public class AIController : MonoBehaviour
 
     //INPUT: A list of pieces from the AI team and a list from the enemy team
     //OUTPUT: Sorted list of moves the AI can make
-    //FORMAT: aiMoves = {Is Attack Move | AI Piece | Movement Location | Value of Move}
+    //FORMAT: aiMoves = {Is Attack Move | Is Commander Move | AI Piece | Movement Location | Value of Move}
     private List<ArrayList> updateAiMoves(List<Piece> aiPieces)
     {
         List<ArrayList> newAiMoves = new List<ArrayList>();
@@ -162,7 +173,7 @@ public class AIController : MonoBehaviour
                     {
                         //Add all additional knight moves.
                         Piece enemyPiece = board.GetPieceOnSquare(move);
-                        newAiMoves.Add(new ArrayList() { true, aiPiece, board.GetPositionFromCoords(enemyPiece.occupiedSquare), getMoveValue(true, true, move, aiPiece, enemyPiece) - 1 });
+                        newAiMoves.Add(new ArrayList() { true, false, aiPiece, board.GetPositionFromCoords(enemyPiece.occupiedSquare), getMoveValue(true, true, false, move, aiPiece, enemyPiece) - 1 });
                     }
                 }
 
@@ -172,28 +183,31 @@ public class AIController : MonoBehaviour
                     Piece enemyPiece = board.GetPieceOnSquare(move);
                     if (enemyPiece != null && !aiPiece.IsFromSameTeam(enemyPiece))
                         //Add an aiMove capture if there is a piece and it is from the enemy's team.
-                        newAiMoves.Add(new ArrayList() { true, aiPiece, board.GetPositionFromCoords(enemyPiece.occupiedSquare), getMoveValue(true, false, move, aiPiece, enemyPiece) });
+                        newAiMoves.Add(new ArrayList() { true, false, aiPiece, board.GetPositionFromCoords(enemyPiece.occupiedSquare), getMoveValue(true, false, false, move, aiPiece, enemyPiece) });
                     else if (enemyPiece == null)
                     {
                         if (aiPiece.pieceType != PieceType.King && aiPiece.pieceType != PieceType.Bishop)
                             //Add an aiMove movement if there no piece in an avaliable move spot (non-commander)
-                            newAiMoves.Add(new ArrayList() { false, aiPiece, board.GetPositionFromCoords(move), getMoveValue(false, false, move, aiPiece, null) });
+                            newAiMoves.Add(new ArrayList() { false, false, aiPiece, board.GetPositionFromCoords(move), getMoveValue(false, false, false, move, aiPiece, null) });
                         else
                         {
+                            int corpMoveNumber = aiPiece.CorpMoveNumber();
+                            bool cM1 = aiPiece.CommanderMovedOne();
+                            
                             if(aiPiece.CorpMoveNumber() < 1)
                                 //Add an aiMove movement if there no piece in an avaliable move spot (commander making any move)
-                                newAiMoves.Add(new ArrayList() { false, aiPiece, board.GetPositionFromCoords(move), getMoveValue(false, false, move, aiPiece, null) });
+                                newAiMoves.Add(new ArrayList() { false, true, aiPiece, board.GetPositionFromCoords(move), getMoveValue(false, false, true, move, aiPiece, null) });
                             else if (!aiPiece.CommanderMovedOne())
                             {
                                 List<Vector2Int> adjacentSquares = aiPiece.GetAdjacentSquares();
                                 foreach (Vector2Int adjacentSquare in adjacentSquares)
                                     if (adjacentSquare.Equals(move))
                                         //Add an aiMove movement if there no piece in an avaliable move spot (commander extra move)
-                                        newAiMoves.Add(new ArrayList() { false, aiPiece, board.GetPositionFromCoords(move), getMoveValue(false, false, move, aiPiece, null) });
+                                        newAiMoves.Add(new ArrayList() { false, true, aiPiece, board.GetPositionFromCoords(move), getMoveValue(false, false, true, move, aiPiece, null) });
                             }
                             else if (aiPiece.CorpMoveNumber() < 2 && aiPiece.CommanderMovedOne())
                                 //Add an aiMove movement if there no piece in an avaliable move spot (commander making non-extra-command move)
-                                newAiMoves.Add(new ArrayList() { false, aiPiece, board.GetPositionFromCoords(move), getMoveValue(false, false, move, aiPiece, null) });
+                                newAiMoves.Add(new ArrayList() { false, true, aiPiece, board.GetPositionFromCoords(move), getMoveValue(false, false, true, move, aiPiece, null) });
                         }
                     }
                 }
@@ -227,7 +241,7 @@ public class AIController : MonoBehaviour
 
     //INPUT: Whether the move is a capture move, Whether the move is a special knight move, The final location of the move, The AI piece making the move, The enemy piece being attack (if any)
     //OUTPUT: Total weighted value of the move.
-    private double getMoveValue(bool isCapture, bool isKnightSpecial, Vector2Int moveLocation, Piece aiPiece, Piece enemyPiece)
+    private double getMoveValue(bool isCapture, bool isKnightSpecial, bool isCommanderMove, Vector2Int moveLocation, Piece aiPiece, Piece enemyPiece)
     {
         if (isCapture && isKnightSpecial)
             return (double)1 / (captureTable[aiPiece.pieceType][enemyPiece.pieceType] - 1) * pieceValue[enemyPiece.pieceType];
@@ -261,7 +275,7 @@ public class AIController : MonoBehaviour
     //OUTPUT: Boolean value of whether the move's corp has already made a move or not.
     private bool corpMoved(ArrayList move)
     {
-        Piece piece = (Piece)move[1];
+        Piece piece = (Piece)move[2];
         if (piece.pieceType == PieceType.King || piece.pieceType == PieceType.Bishop)
             return false;
         if (piece.corpType == CorpType.Left && controller.LeftCorpUsed < 1)
@@ -271,6 +285,28 @@ public class AIController : MonoBehaviour
         if (piece.corpType == CorpType.King && controller.KingCorpUsed < 1)
             return false;
         return true;
+    }
+
+    private bool movedOneSquare(Piece piece, Vector2Int moveLocation)
+    {
+        Vector2Int[] directions = new Vector2Int[]
+        {
+            new Vector2Int(-1, 1),
+            new Vector2Int(0, 1),
+            new Vector2Int(1, 1),
+            new Vector2Int(-1, 0),
+            new Vector2Int(1, 0),
+            new Vector2Int(-1, -1),
+            new Vector2Int(0, -1),
+            new Vector2Int(1, -1),
+        };
+        foreach (var direction in directions)
+        {
+            Vector2Int nextDirection = piece.occupiedSquare + direction;
+            if (nextDirection == moveLocation)
+                return true;
+        }
+        return false;
     }
 
     public void AI_TakeTurn() 
