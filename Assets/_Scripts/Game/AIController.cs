@@ -153,7 +153,7 @@ public class AIController : MonoBehaviour
 
         foreach (Piece aiPiece in aiPieces)
         {
-            if (aiPiece.AvailableMoves.Count > 0)
+            if (aiPiece.AvailableMoves.Count > 0 && (aiPiece.pieceType == PieceType.King || aiPiece.pieceType == PieceType.Bishop || aiPiece.CorpMoveNumber() < 1))
             {
                 //Handle finding the true area a knight can capture. Knight's AvailableMoves doesn't give an honest representation.
                 if (aiPiece.pieceType == PieceType.Knight)
@@ -175,8 +175,16 @@ public class AIController : MonoBehaviour
                         newAiMoves.Add(new ArrayList() { true, aiPiece, board.GetPositionFromCoords(enemyPiece.occupiedSquare), getMoveValue(true, false, move, aiPiece, enemyPiece) });
                     else if (enemyPiece == null)
                     {
-                        //Add an aiMove movement if there no piece in an avaliable move spot
-                        newAiMoves.Add(new ArrayList() { false, aiPiece, board.GetPositionFromCoords(move), getMoveValue(false, false, move, aiPiece, null) });
+                        if (aiPiece.pieceType != PieceType.King && aiPiece.pieceType != PieceType.Bishop)
+                            //Add an aiMove movement if there no piece in an avaliable move spot (non-commander)
+                            newAiMoves.Add(new ArrayList() { false, aiPiece, board.GetPositionFromCoords(move), getMoveValue(false, false, move, aiPiece, null) });
+                        else
+                        {
+                            if(aiPiece.CommanderMovedOne() && aiPiece.CorpMoveNumber() < 1)
+                                //Add an aiMove movement if there no piece in an avaliable move spot (commander making normal move)
+                                newAiMoves.Add(new ArrayList() { false, aiPiece, board.GetPositionFromCoords(move), getMoveValue(false, false, move, aiPiece, null) });
+                            else if (!aiPiece.CommanderMovedOne())
+                        }
                     }
                 }
             }
@@ -244,6 +252,8 @@ public class AIController : MonoBehaviour
     private bool corpMoved(ArrayList move)
     {
         Piece piece = (Piece)move[1];
+        if (piece.pieceType == PieceType.King || piece.pieceType == PieceType.Bishop)
+            return false;
         if (piece.corpType == CorpType.Left && controller.LeftCorpUsed < 1)
             return false;
         if (piece.corpType == CorpType.Right && controller.RightCorpUsed < 1)
