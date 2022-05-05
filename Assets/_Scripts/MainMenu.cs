@@ -11,7 +11,7 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private GameObject softScreen,mainMenuScreen, playScreen, statsScreen, settingsScreen, rulesScreen, creditsScreen;
     [SerializeField] private TextMeshProUGUI winText, loseText;
     [SerializeField] private Button aiVsAiButton;
-    [SerializeField] private Dropdown changeResolution;
+    [SerializeField] private TMP_Dropdown changeResolution;
 
     private const string WINS = "Wins", LOSS = "Losses";
     
@@ -194,6 +194,7 @@ public class MainMenu : MonoBehaviour
     
     public void UI_SetResolution(int resIndex)
     {
+        Debug.Log("change res to " + resIndex);
         Resolution resolution = resolutions[resIndex];
         Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreen);
     }
